@@ -6,8 +6,17 @@
  * Author: Jared Eddy
  * Author URI: http://www.sitesrealized.com
  */
+ 
 
+ function wptuts_styles_with_the_lot()
+{
+    
+    wp_enqueue_style( 'custom-style', plugins_url( 'assets/css/bibleVerses.css', __FILE__ ), 'all' );
+}
+add_action( 'wp_enqueue_scripts', 'wptuts_styles_with_the_lot' );
 class bibleVerses {
+
+
 	public function __construct() {
         add_shortcode('verse', array($this, 'bibleVerses'));
     }
@@ -16,7 +25,8 @@ class bibleVerses {
         $output = "";
 
         $verse = $this->getVerse();
-        $output = $verse['quote'];
+        $output = "<div class=\"bible-verse\">".$verse['quote']."</div>";
+        $output .= "<div class=\"bible-verse-details\">".$verse['book']." ".$verse['chapter'].":". $verse['verses']." ".$verse['version']."</div>";
         
         return $output;
     }
@@ -45,7 +55,7 @@ class bibleVerses {
 	   			"version"=>"NIV"
 	   			)
    		);
-   		return array_rand($verses,1);;
+   		return $verses[array_rand($verses,1)];
    	}
 };
 
