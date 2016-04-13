@@ -13,11 +13,12 @@ class bibleVerses {
     }
      
     public function bibleVerses(){
-    	$output = "";
-    	$verses = array ();
-    	$output = $this->getVerse();
-    	$output = $verses['quote'];
-    	return $output;
+        $output = "";
+
+        $verse = $this->getVerse();
+        $output = $verse['quote'];
+        
+        return $output;
     }
 
    	function getVerse() {
