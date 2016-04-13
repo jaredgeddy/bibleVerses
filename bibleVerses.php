@@ -14,8 +14,9 @@ class bibleVerses {
      
     public function bibleVerses(){
     	$output = "";
-    	$output = $this->getVerse()['version'];
-
+    	$verses = array ();
+    	$output = $this->getVerse();
+    	$output = $verses['quote'];
     	return $output;
     }
 
@@ -43,7 +44,7 @@ class bibleVerses {
 	   			"version"=>"NIV"
 	   			)
    		);
-   		return array_rand($verses);
+   		return array_rand($verses,1);;
    	}
 };
 
