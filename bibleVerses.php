@@ -8,12 +8,13 @@
  */
  
 
- function wptuts_styles_with_the_lot()
+ function includeStyles()
 {
     
-    wp_enqueue_style( 'custom-style', plugins_url( 'assets/css/bibleVerses.css', __FILE__ ), 'all' );
+    wp_enqueue_style( 'Bible Verses Style', plugins_url( 'assets/css/bibleVerses.css', __FILE__ ), 'all' );
 }
-add_action( 'wp_enqueue_scripts', 'wptuts_styles_with_the_lot' );
+add_action( 'wp_enqueue_scripts', 'includeStyles' );
+
 class bibleVerses {
 
 
