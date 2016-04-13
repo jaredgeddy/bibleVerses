@@ -10,39 +10,39 @@
 class bibleVerses {
 	public function __construct() {
         add_shortcode('verse', array($this, 'bibleVerses'));
-    };
+    }
      
     public function bibleVerses(){
     	$output = "";
     	$output = $this->getVerse[randOutput];
-    	$output = 
     	return $output;
-    };
+    }
 
    	function getVerse() {
    		$verses = array (
    			array (
-	   			"quote"=>"For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life."
+	   			"quote"=>"For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
 	   			"book"=>"John",
-	   			"chapter"=>"3"
-	   			"verses"=>"16"
+	   			"chapter"=>"3",
+	   			"verses"=>"16",
 	   			"version"=>"NIV"
 	   			),
    			array (
-	   			"quote"=>"Get rid of all bitterness, rage and anger, brawling and slander, along with every form of malice. 32 Be kind and compassionate to one another, forgiving each other, just as in Christ God forgave you."
+	   			"quote"=>"Get rid of all bitterness, rage and anger, brawling and slander, along with every form of malice. 32 Be kind and compassionate to one another, forgiving each other, just as in Christ God forgave you.",
 	   			"book"=>"Ephesians",
-	   			"chapter"=>"4"
-	   			"verses"=>"31-32"
+	   			"chapter"=>"4",
+	   			"verses"=>"31-32",
 	   			"version"=>"NIV"
 	   			),
    			array (
-	   			"quote"=>"Therefore do not worry about tomorrow, for tomorrow will worry about itself. Each day has enough trouble of its own."
+	   			"quote"=>"Therefore do not worry about tomorrow, for tomorrow will worry about itself. Each day has enough trouble of its own.",
 	   			"book"=>"Matthew",
-	   			"chapter"=>"6"
-	   			"verses"=>"34"
+	   			"chapter"=>"6",
+	   			"verses"=>"34",
 	   			"version"=>"NIV"
 	   			)
-   		);
+   		)
+   		return array_rand($verses, 1);
    	};
 };
 
