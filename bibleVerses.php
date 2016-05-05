@@ -82,7 +82,9 @@ class bibleVerses {
    	// Creates empty tables
    	private function createTables() {
 		global $wpdb;
-		
+		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+		// bible_version_key table creation		
 		$table_name = $wpdb->prefix . 'bible_version_key';
 		
 		$sql = "CREATE TABLE `{$table_name}` (
@@ -99,7 +101,6 @@ class bibleVerses {
 			  PRIMARY KEY (`id`)
 			);";
 		
-		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 		dbDelta($sql);
    	}
 
@@ -114,14 +115,13 @@ class bibleVerses {
    	private function loadTablesFromRemote() {
 
    		global $wpdb;
-
-   		// Load bible_version_key table
+   		$origin = 'https://raw.githubusercontent.com/scrollmapper/bible_databases/master/csv/';
 
         // Fix for CSVs from OSX
         ini_set("auto_detect_line_endings", "1");   
 
+   		// Load bible_version_key table
    		// Get the remote CSV file
-   		$origin = 'https://raw.githubusercontent.com/scrollmapper/bible_databases/master/csv/';
    		$filename = 'bible_version_key.csv';
         $remote = $origin.$filename;
         file_put_contents($filename,fopen($remote,'r'));
@@ -130,7 +130,10 @@ class bibleVerses {
 		$file = fopen($filename,'r');
 
         // Skip first row, return if we don't have that
-        if (($line = fgetcsv($file)) == FALSE) return;
+        if (($line = fgetcsv($file)) == FALSE) {
+        	fclose($file);
+			return;
+        }
 
         // Now process lines
         while (($line = fgetcsv($file)) !== FALSE) {
