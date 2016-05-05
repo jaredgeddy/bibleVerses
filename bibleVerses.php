@@ -7,27 +7,23 @@
  * Author URI: http://www.sitesrealized.com
  */
  
-
- function includeStyles()
-{
-    
-    wp_enqueue_style( 'Bible Verses Style', plugins_url( 'assets/css/bibleVerses.css', __FILE__ ), 'all' );
-}
-add_action( 'wp_enqueue_scripts', 'includeStyles' );
-
 class bibleVerses {
-
 
 	public function __construct() {
         add_shortcode('verse', array($this, 'bibleVerses'));
+        add_action( 'wp_enqueue_scripts', array($this, 'includeStyles'));
     }
      
+	public function includeStyles() {
+		wp_enqueue_style( 'Bible Verses Style', plugins_url( 'assets/css/bibleVerses.css', __FILE__ ), 'all' );
+	}
+
     public function bibleVerses(){
         $output = "";
 
         $verse = $this->getVerse();
-        $output = "<div class=\"bible-verse\">".$verse['quote']."</div>";
-        $output .= "<div class=\"bible-verse-details\">".$verse['book']." ".$verse['chapter'].":". $verse['verses']." ".$verse['version']."</div>";
+        $output = '<div class="bible-verse">'.$verse['quote'].'</div>';
+        $output .= '<div class="bible-verse-details">'.$verse['book'].' '.$verse['chapter'].':'. $verse['verses'].' '.$verse['version'].'</div>';
         
         return $output;
     }
