@@ -12,8 +12,32 @@ class bibleVerses {
 	public function __construct() {
         add_shortcode('verse', array($this, 'bibleVerses'));
         add_action( 'wp_enqueue_scripts', array($this, 'includeStyles'));
+
+		if (array_key_exists('jbvtest', $_GET) && ($_GET['jbvtest'] == '1')) {
+			add_action('init', array($this,'test'), 12);
+		}
+
     }
-     
+    
+    public function test() {
+
+    	echo '<pre>';
+    	echo 'Creating tables....<br />';
+    	$this->createTables();
+    	echo 'Created tables....<br />';
+    	echo 'Truncating data we already had....<br />';
+    	$this->truncateTables();
+    	echo 'Finished truncating....<br />';
+    	echo 'Load tables from remote....<br />';
+    	$this->loadTablesFromRemote();
+    	echo 'Finished loading tables....<br />';
+    	echo 'Done.<br />';
+    	echo '</pre>';
+
+    	wp_die();
+
+    }
+
 	public function includeStyles() {
 		wp_enqueue_style( 'Bible Verses Style', plugins_url( 'assets/css/bibleVerses.css', __FILE__ ), 'all' );
 	}
@@ -28,7 +52,7 @@ class bibleVerses {
         return $output;
     }
 
-   	function getVerse() {
+   	private function getVerse() {
    		$verses = array (
    			array (
 	   			"quote"=>"For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
@@ -54,7 +78,85 @@ class bibleVerses {
    		);
    		return $verses[array_rand($verses,1)];
    	}
+
+   	// Creates empty tables
+   	private function createTables() {
+		global $wpdb;
+		
+		$table_name = $wpdb->prefix . 'bible_version_key';
+		
+		$sql = "CREATE TABLE `{$table_name}` (
+			  `id` int(3) unsigned zerofill NOT NULL AUTO_INCREMENT,
+			  `table` text NOT NULL COMMENT 'Database Table Name ',
+			  `abbreviation` text NOT NULL COMMENT 'Version Abbreviation',
+			  `language` text NOT NULL COMMENT 'Language of bible translation (used for language key tables)',
+			  `version` text NOT NULL COMMENT 'Version Name',
+			  `info_text` text NOT NULL COMMENT 'About / Info',
+			  `info_url` text NOT NULL COMMENT 'Info URL',
+			  `publisher` text NOT NULL COMMENT 'Publisher',
+			  `copyright` text NOT NULL COMMENT 'Copyright ',
+			  `copyright_info` text NOT NULL COMMENT 'Extended Copyright info',
+			  PRIMARY KEY (`id`)
+			);";
+		
+		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+		dbDelta($sql);
+   	}
+
+   	// Empties data from the tables without deleting the tables themselves
+   	private function truncateTables() {
+   		global $wpdb;
+
+   		$wpdb->query('truncate table '.$wpdb->prefix.'bible_version_key');
+   	}
+
+   	// Get the data to put into the tables from CSV files on GitHub
+   	private function loadTablesFromRemote() {
+
+   		global $wpdb;
+
+   		// Load bible_version_key table
+
+        // Fix for CSVs from OSX
+        ini_set("auto_detect_line_endings", "1");   
+
+   		// Get the remote CSV file
+   		$origin = 'https://raw.githubusercontent.com/scrollmapper/bible_databases/master/csv/';
+   		$filename = 'bible_version_key.csv';
+        $remote = $origin.$filename;
+        file_put_contents($filename,fopen($remote,'r'));
+
+        // Open the local file we just acquired
+		$file = fopen($filename,'r');
+
+        // Skip first row, return if we don't have that
+        if (($line = fgetcsv($file)) == FALSE) return;
+
+        // Now process lines
+        while (($line = fgetcsv($file)) !== FALSE) {
+	        $wpdb->insert($wpdb->prefix.'bible_version_key', array(
+	        	'id' => $line[0],
+	        	'table' => $line[1],
+	        	'abbreviation' => $line[2],
+	        	'language' => $line[3],
+	        	'version' => $line[4],
+	        	'info_text' => $line[5],
+	        	'info_url' => $line[6],
+	        	'publisher' => $line[7],
+	        	'copyright' => $line[8],
+	        	'copyright_info' => $line[9]
+	        ));
+        }
+
+        fclose($file);
+   	}
+
+   	// Remove the tables entirely from the database
+   	private function deleteTables() {
+
+   	}
+
 };
 
 
-$bibleVerses = new bibleVerses ();
+$bibleVerses = new bibleVerses();
