@@ -23,7 +23,7 @@ class bibleVerses {
 
     	echo '<pre>';
     	echo 'Creating tables....<br />';
-    	$this->createTables();
+    	$this->createVersionTable();
     	echo 'Created tables....<br />';
     	echo 'Truncating data we already had....<br />';
     	$this->truncateTables();
@@ -77,10 +77,10 @@ class bibleVerses {
 	   			)
    		);
    		return $verses[array_rand($verses,1)];
-   	}
+   	 }
 
    	// Creates empty tables
-   	private function createTables() {
+   	private function createVersionTable() {
 		global $wpdb;
 		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
@@ -102,6 +102,18 @@ class bibleVerses {
 			);";
 		
 		dbDelta($sql);
+
+		$table_name = $wpdb->prefix . 'key_abbreviations_english';
+
+		$sql = "CREATE TABLE `{$table_name}` (
+			  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Abbreviation ID',
+  			  `a` varchar(255) NOT NULL,
+  			  `b` smallint(5) unsigned NOT NULL COMMENT 'ID of book that is abbreviated',
+  			  `p` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Whether an abbreviation is the primary one for the book',
+  			  PRIMARY KEY (`id`)
+  			  );";
+		
+		dbDelta($sql);
    	}
 
    	// Empties data from the tables without deleting the tables themselves
@@ -109,6 +121,7 @@ class bibleVerses {
    		global $wpdb;
 
    		$wpdb->query('truncate table '.$wpdb->prefix.'bible_version_key');
+   		$wpdb->query('truncate table '.$wpdb->prefix.'key_abbreviations_english');
    	}
 
    	// Get the data to put into the tables from CSV files on GitHub
@@ -125,6 +138,7 @@ class bibleVerses {
    		$filename = 'bible_version_key.csv';
         $remote = $origin.$filename;
         file_put_contents($filename,fopen($remote,'r'));
+
 
         // Open the local file we just acquired
 		$file = fopen($filename,'r');
@@ -152,7 +166,36 @@ class bibleVerses {
         }
 
         fclose($file);
+
+         // Load key_abbreviations_english table
+   		// Get the remote CSV file
+   		$filename = 'key_abbreviations_english.csv';
+        $remote = $origin.$filename;
+        file_put_contents($filename,fopen($remote,'r'));
+
+
+        // Open the local file we just acquired
+		$file = fopen($filename,'r');
+
+        // Skip first row, return if we don't have that
+        if (($line = fgetcsv($file)) == FALSE) {
+        	fclose($file);
+			return;
+        }
+
+        // Now process lines
+        while (($line = fgetcsv($file)) !== FALSE) {
+	        $wpdb->insert($wpdb->prefix.'key_abbreviations_english', array(
+	        	'id' => $line[0],
+	        	'a' => $line[1],
+	        	'b' => $line[2],
+	        	'p' => $line[3]
+	        ));
+        }
+
+        fclose($file);
    	}
+
 
    	// Remove the tables entirely from the database
    	private function deleteTables() {
