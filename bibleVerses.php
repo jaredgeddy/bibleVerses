@@ -139,6 +139,20 @@ class bibleVerses {
   			  );";
 		
 		dbDelta($sql);
+
+		// Create Key Genre English table
+		$table_name = $wpdb->prefix . 't_asv';
+
+		$sql = "CREATE TABLE `{$table_name}` (
+			    `id` int(8) unsigned zerofill NOT NULL,
+  				`b` int(11) NOT NULL,
+  				`c` int(11) NOT NULL,
+  				`v` int(11) NOT NULL,
+  				`t` text NOT NULL,
+  				PRIMARY KEY (`id`)
+  			  );";
+		
+		dbDelta($sql);
    	}
 
    	// Empties data from the tables without deleting the tables themselves
@@ -148,6 +162,8 @@ class bibleVerses {
    		$wpdb->query('truncate table '.$wpdb->prefix.'bible_version_key');
    		$wpdb->query('truncate table '.$wpdb->prefix.'key_abbreviations_english');
    		$wpdb->query('truncate table '.$wpdb->prefix.'key_english');
+   		$wpdb->query('truncate table '.$wpdb->prefix.'key_genre_english');
+   		$wpdb->query('truncate table '.$wpdb->prefix.'t_asv');
    	}
 
    	// Get the data to put into the tables from CSV files on GitHub
@@ -270,6 +286,35 @@ class bibleVerses {
 	        $wpdb->insert($wpdb->prefix.'key_genre_english', array(
 	        	'g' => $line[0],
 	        	'n' => $line[1]
+	        ));
+        }
+
+        fclose($file);
+
+         // Load t_asv table
+   		// Get the remote CSV file
+   		$filename = 't_asv.csv';
+        $remote = $origin.$filename;
+        file_put_contents($filename,fopen($remote,'r'));
+
+
+        // Open the local file we just acquired
+		$file = fopen($filename,'r');
+
+        // Skip first row, return if we don't have that
+        if (($line = fgetcsv($file)) == FALSE) {
+        	fclose($file);
+			return;
+        }
+
+        // Now process lines
+        while (($line = fgetcsv($file)) !== FALSE) {
+	        $wpdb->insert($wpdb->prefix.'t_asv', array(
+	        	'id' => $line[0],
+	        	'b' => $line[1],
+	        	'c' => $line[2],
+	        	'v' => $line[3],
+	        	't' => $line[4]
 	        ));
         }
 
