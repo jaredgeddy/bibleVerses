@@ -103,6 +103,7 @@ class bibleVerses {
 		
 		dbDelta($sql);
 
+		// Create Key Abbreviations English table
 		$table_name = $wpdb->prefix . 'key_abbreviations_english';
 
 		$sql = "CREATE TABLE `{$table_name}` (
@@ -115,6 +116,7 @@ class bibleVerses {
 		
 		dbDelta($sql);
 
+		// Create Key English table
 		$table_name = $wpdb->prefix . 'key_english';
 
 		$sql = "CREATE TABLE `{$table_name}` (
@@ -123,6 +125,17 @@ class bibleVerses {
     		  `t` varchar(2) NOT NULL COMMENT 'Which Testament this book is in',
   			  `g` tinyint(3) unsigned NOT NULL COMMENT 'A genre ID to identify the type of book this is',
     		  PRIMARY KEY (`b`)
+  			  );";
+		
+		dbDelta($sql);
+
+		// Create Key Genre English table
+		$table_name = $wpdb->prefix . 'key_genre_english';
+
+		$sql = "CREATE TABLE `{$table_name}` (
+			    `g` tinyint(3) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Genre ID',
+  				`n` varchar(255) NOT NULL COMMENT 'Name of genre',
+  				PRIMARY KEY (`g`)
   			  );";
 		
 		dbDelta($sql);
@@ -231,6 +244,32 @@ class bibleVerses {
 	        	'n' => $line[1],
 	        	't' => $line[2],
 	        	'g' => $line[3]
+	        ));
+        }
+
+        fclose($file);
+
+         // Load key_genre_english table
+   		// Get the remote CSV file
+   		$filename = 'key_genre_english.csv';
+        $remote = $origin.$filename;
+        file_put_contents($filename,fopen($remote,'r'));
+
+
+        // Open the local file we just acquired
+		$file = fopen($filename,'r');
+
+        // Skip first row, return if we don't have that
+        if (($line = fgetcsv($file)) == FALSE) {
+        	fclose($file);
+			return;
+        }
+
+        // Now process lines
+        while (($line = fgetcsv($file)) !== FALSE) {
+	        $wpdb->insert($wpdb->prefix.'key_genre_english', array(
+	        	'g' => $line[0],
+	        	'n' => $line[1]
 	        ));
         }
 
